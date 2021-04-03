@@ -1,19 +1,16 @@
 import express from "express";
 import { Player, IPlayer } from "./../models/player";
 import { Lobby } from "./../models/lobby";
-import { body, validationResult } from 'express-validator';
+import { body } from 'express-validator';
+import validateRequest from './../middleware/validateRequest';
 
 export const lobbyRouter = express.Router();
 
 lobbyRouter.post('/create',
     body('username').isString().isLength({ min: 1, max: 25 }),
+    validateRequest,
     async (req, res) => {
         try {
-            const errors = validationResult(req);
-            if (!errors.isEmpty()) {
-              return res.status(400).json({ errors: errors.array() });
-            }
-
             const { username } = req.body;
             const player: Partial<IPlayer> = { username };
             const lobby = Lobby.build({
@@ -31,13 +28,9 @@ lobbyRouter.post('/create',
 lobbyRouter.post('/join',
     body('lobbyId').isUUID(),
     body('username').isString().isLength({ min: 1, max: 25 }),
+    validateRequest,
     async (req, res) => {
         try {
-            const errors = validationResult(req);
-            if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
-            }
-
             const { lobbyId, username } = req.body;
             const lobby = await Lobby.findById(lobbyId);
             if (lobby === null)
@@ -62,13 +55,9 @@ lobbyRouter.post('/join',
 lobbyRouter.post('/leave',
     body('lobbyId').isUUID(),
     body('playerId').isUUID(),
+    validateRequest,
     async (req, res) => {
         try {
-            const errors = validationResult(req);
-            if (!errors.isEmpty()) {
-              return res.status(400).json({ errors: errors.array() });
-            }
-
             const { lobbyId, playerId } = req.body;
             const lobby = await Lobby.findById(lobbyId);
             if (lobby === null)
