@@ -1,6 +1,7 @@
 import express from "express";
 import { Player, IPlayer } from "./../models/player";
-import { Lobby } from "./../models/lobby";
+import { Lobby, LobbyStatus } from "./../models/lobby";
+import { MatchmakingTicket, TicketStatus } from "./../models/matchmakingticket";
 import { body } from 'express-validator';
 import validateRequest from './../middleware/validateRequest';
 
@@ -12,9 +13,10 @@ lobbyRouter.post('/create',
     async (req, res) => {
         try {
             const { username } = req.body;
-            const player: Partial<IPlayer> = { username };
+            const player: IPlayer = Player.build({ username });
             const lobby = Lobby.build({
-                players: [player]
+                players: [player],
+                playerOwnerId: player.id
             });
             await lobby.validate();
             await lobby.save();
@@ -39,6 +41,9 @@ lobbyRouter.post('/join',
             const existingUsername = lobby.players.find((player) => player.username === username);
             if (existingUsername !== undefined)
                 return res.status(400).send({error: `Lobby with id '${lobbyId}' already has player with username '${username}'.`});
+
+            if (lobby.status !== LobbyStatus.Created)
+                return res.status(400).send({error: `Lobby with id '${lobbyId}' is not currently joinable.`});
 
             const player: IPlayer = Player.build({ username });
             lobby.players.push(player);
@@ -71,6 +76,24 @@ lobbyRouter.post('/leave',
                 if(item === player)
                     lobby.players.splice(index, 1);
             });
+
+            // If a player leaves while the lobby is matchmaking then cancel the matchmaking ticket
+            if (lobby.status === LobbyStatus.Matchmaking) {
+                lobby.status = LobbyStatus.Created;
+                const matchmakingTicket = await MatchmakingTicket.findOne({ 'lobby._id': lobbyId }); // TODO: Make sure this has an index when used as a subdocument
+                if (matchmakingTicket !== null) {
+                    matchmakingTicket.status = TicketStatus.Cancelled;
+                    await matchmakingTicket.validate();
+                    await matchmakingTicket.save();
+                }
+            }
+
+            // If there are no players left in the lobby disband it
+            if (lobby.players.length === 0)
+                lobby.status = LobbyStatus.Disbanded;
+            // If the player owner just left reassign it to someone else
+            else if (lobby.playerOwnerId === playerId)
+                lobby.playerOwnerId = lobby.players[0].id;
 
             await lobby.validate();
             await lobby.save();
