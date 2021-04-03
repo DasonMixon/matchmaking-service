@@ -53,4 +53,4 @@ matchmakingTicketSchema.statics.build = (attr: Partial<IMatchmakingTicket>) => {
 
 const MatchmakingTicket = mongoose.model<MatchmakingTicketDoc, MatchmakingTicketModelInterface>('MatchmakingTicket', matchmakingTicketSchema);
 
-export { MatchmakingTicket, IMatchmakingTicket, TicketStatus }
+export { MatchmakingTicket, IMatchmakingTicket, TicketStatus, MatchmakingTicketDoc }

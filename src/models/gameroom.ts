@@ -15,7 +15,7 @@ interface IGameRoom {
 }
 
 interface GameRoomModelInterface extends mongoose.Model<GameRoomDoc> {
-    build(attr: IGameRoom): GameRoomDoc;
+    build(attr: Partial<IGameRoom>): GameRoomDoc;
 }
 
 interface GameRoomDoc extends mongoose.Document {
@@ -45,7 +45,7 @@ const gameRoomSchema = new mongoose.Schema({
     }
 });
 
-gameRoomSchema.statics.build = (attr: IGameRoom) => {
+gameRoomSchema.statics.build = (attr: Partial<IGameRoom>) => {
     return new GameRoom(attr);
 }
 

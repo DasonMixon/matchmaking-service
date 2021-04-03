@@ -38,7 +38,23 @@ gameRoomRouter.post('/leave',
         }
     });
 
-// Need following endpoints for the game server to hit
-/*
-/complete (Marks the game as being completed)
-*/
+gameRoomRouter.post('/complete',
+    body('gameRoomId').isUUID(),
+    validateRequest,
+    async (req, res) => {
+        try {
+            const { gameRoomId } = req.body;
+            const gameRoom = await GameRoom.findById(gameRoomId);
+            if (gameRoom === null)
+                return res.status(400).send({error: `Game room with id '${gameRoomId}' does not exist.`});
+            
+            gameRoom.status = GameStatus.Completed;
+
+            await gameRoom.validate();
+            await gameRoom.save();
+            return res.status(200).send(gameRoom);
+        } catch (err) {
+            console.log(err);
+            return res.status(500).send({error: err});
+        }
+    });
