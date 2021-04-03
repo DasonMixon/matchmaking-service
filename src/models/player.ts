@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 interface IPlayer {
     id: string;
     username: string;
+    attributes: Map<string, string>;
     createdDate: Date;
 }
 
@@ -14,6 +15,7 @@ interface PlayerModelInterface extends mongoose.Model<PlayerDoc> {
 interface PlayerDoc extends mongoose.Document {
     id: string;
     username: string;
+    attributes: Map<string, string>;
     createdDate: Date;
 }
 
@@ -27,6 +29,11 @@ const playerSchema = new mongoose.Schema({
         type: String,
         required: true,
         unique: true
+    },
+    attributes: {
+        type: Map,
+        required: true,
+        default: new Map<string, string>()
     },
     createdDate: {
         type: Date,

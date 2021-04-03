@@ -53,4 +53,4 @@ gameDefinitionSchema.statics.build = (attr: IGameDefinition) => {
 
 const GameDefinition = mongoose.model<GameDefinitionDoc, GameDefinitionModelInterface>('GameDefinition', gameDefinitionSchema);
 
-export { GameDefinition, Games, IGameDefinition }
+export { gameDefinitionSchema, GameDefinition, Games, IGameDefinition }

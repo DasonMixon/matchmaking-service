@@ -4,19 +4,25 @@ import { Lobby, LobbyStatus } from "./../models/lobby";
 import { MatchmakingTicket, TicketStatus } from "./../models/matchmakingticket";
 import { body } from 'express-validator';
 import validateRequest from './../middleware/validateRequest';
+import { Games } from "./../models/gamedefinition";
 
 export const lobbyRouter = express.Router();
 
 lobbyRouter.post('/create',
     body('username').isString().isLength({ min: 1, max: 25 }),
+    body('gameType').isString().isLength({ min: 1 }),
     validateRequest,
     async (req, res) => {
         try {
-            const { username } = req.body;
+            const { username, gameTypeRaw } = req.body;
+            const gameType : Games = Games[gameTypeRaw as keyof typeof Games];
             const player: IPlayer = Player.build({ username });
             const lobby = Lobby.build({
                 players: [player],
-                playerOwnerId: player.id
+                playerOwnerId: player.id,
+                preferences: new Map<string, string>([
+                    ['gameType', gameType]
+                ])
             });
             await lobby.validate();
             await lobby.save();
