@@ -1,5 +1,5 @@
 import express from "express";
-import { GameDefinition, Games, IGameDefinition } from "./../models/gamedefinition";
+import { GameDefinition, IGameDefinition } from "./../models/gamedefinition";
 
 export const gameDefinitionsRouter = express.Router();
 
@@ -14,11 +14,6 @@ gameDefinitionsRouter.post('/create', async (req, res) => {
         const gameDefinition = GameDefinition.build(model);
         await gameDefinition.validate();
         await gameDefinition.save();
-
-        // TODO: Figure out how to get enum to store / serialize proeprly
-        if (gameDefinition.type === Games.PokemonBattlegrounds)
-            console.log('evals just fine');
-
         return res.status(200).send(gameDefinition);
     } catch (err) {
         console.log(err);

@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 import { v4 as uuidv4 } from 'uuid';
 
 enum Games {
-    PokemonBattlegrounds = 1
+    PokemonBattlegrounds = 'PokemonBattlegrounds'
 }
 
 interface IGameDefinition {
